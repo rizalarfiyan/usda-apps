@@ -3,6 +3,7 @@
 #include <vector>
 #include <csignal>
 #include <string>
+#include <cctype>
 using namespace std;
 
 #define arrLength(x) (sizeof(x) / sizeof(x[0]))
@@ -30,6 +31,30 @@ void clearScreen()
 bool isNumber(const string &s)
 {
     return s.find_first_not_of("0123456789") == string::npos;
+}
+
+bool isAlphaSpace(const string &s)
+{
+    for (char c : s)
+    {
+        if (!(isalpha(c) || (c == ' ')))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+string toUpper(string str)
+{
+    for (int i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+    return str;
+}
+
+bool searchString(string str, string find) {
+    return toUpper(str).find(toUpper(find)) != std::string::npos;
 }
 
 vector<string> split(string str, string separator = " ")
@@ -114,14 +139,8 @@ void printApp()
     cout << "+ -------------------------------------------------------------------- +" << endl;
 }
 
-void getAllUsers()
+void printUsers(vector<User> users)
 {
-    printApp();
-    cout << "+ -------------------------- Get all users --------------------------- +" << endl;
-    cout << "+ -------------------------------------------------------------------- +" << endl;
-    cout << endl;
-    vector<User> users = readFile();
-
     for (int i = 0; i < users.size(); i++)
     {
         User user = users[i];
@@ -139,9 +158,65 @@ void getAllUsers()
     cout << endl;
 }
 
+void getAllUsers()
+{
+    printApp();
+    cout << "+ -------------------------- Get all users --------------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+
+    vector<User> users = readFile();
+    printUsers(users);
+}
+
 void searchUserByName()
 {
-    cout << "  call searchUserByName()" << endl;
+    string search;
+    printApp();
+    cout << "+ ----------------------- Search users by name ----------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+
+    cin.ignore();
+    while (true)
+    {
+        string tempSearch;
+        cout << "  Search name: ";
+        getline(cin, tempSearch);
+        cout << endl;
+
+        if (!isAlphaSpace(tempSearch))
+        {
+            cout << "  Please input an alpha space!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        search = tempSearch;
+        break;
+    }
+
+    vector<User> users = readFile();
+
+    vector<User> filterUsers;
+    for (int i = 0; i < users.size(); i++)
+    {
+        User user = users[i];
+        bool found = searchString(user.nama, search);
+        if (found)
+        {
+            filterUsers.push_back(user);
+        }
+    }
+
+    if (filterUsers.size() == 0)
+    {
+        cout << "+ -------------------------------------------------------------------- +" << endl;
+        cout << "+ -------------------------- Users not found ------------------------- +" << endl;
+        cout << "+ -------------------------------------------------------------------- +" << endl;
+    }
+
+    printUsers(filterUsers);
 }
 
 void addUsers()
@@ -176,7 +251,7 @@ bool buildMenu()
 
         if (!isNumber(strChooseMenu))
         {
-            cout << "  Please enter number!" << endl;
+            cout << "  Please input a number!" << endl;
             cout << endl;
             continue;
         }
@@ -184,7 +259,7 @@ bool buildMenu()
         int tempChooseMenu = stoi(strChooseMenu);
         if (tempChooseMenu < 0)
         {
-            cout << "  Please enter positive number!" << endl;
+            cout << "  Please input a positive number!" << endl;
             cout << endl;
             break;
         }
@@ -207,6 +282,7 @@ bool buildMenu()
         getAllUsers();
         break;
     case 2:
+        clearScreen();
         searchUserByName();
         break;
     case 3:
