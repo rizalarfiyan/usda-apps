@@ -265,17 +265,13 @@ void getAllUsers()
     printUsers(users);
 }
 
-void searchUserByName()
+vector<User> findUserFilter(bool isDelete = false)
 {
-    printApp();
-    cout << "+ ----------------------- Search users by name ----------------------- +" << endl;
-    cout << "+ -------------------------------------------------------------------- +" << endl;
-    cout << endl;
-
     cin.ignore();
     string search = inputString("  Search name: ");
     vector<User> users = readFile();
 
+    vector<User> includeFilterUsers;
     vector<User> filterUsers;
     for (int i = 0; i < users.size(); i++)
     {
@@ -284,6 +280,10 @@ void searchUserByName()
         if (found)
         {
             filterUsers.push_back(user);
+        }
+        else if (isDelete)
+        {
+            includeFilterUsers.push_back(user);
         }
     }
 
@@ -295,6 +295,18 @@ void searchUserByName()
     }
 
     printUsers(filterUsers);
+
+    return isDelete ? includeFilterUsers : filterUsers;
+}
+
+void searchUserByName()
+{
+    printApp();
+    cout << "+ ----------------------- Search users by name ----------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+
+    findUserFilter();
 }
 
 void addUsers()
@@ -326,12 +338,29 @@ void addUsers()
         };
         users.push_back(user);
     }
+
     writeFile(users);
+
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << "+ ------------------------- Success add users ------------------------ +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
 }
 
 void deleteUser()
 {
-    cout << "  call deleteUser()" << endl;
+    printApp();
+    cout << "+ ----------------------- Delete users by name ----------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+
+    vector<User> deleteUsers = findUserFilter(true);
+    writeFile(deleteUsers);
+
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << "+ ------------------- Success delete users by name ------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
 }
 
 bool buildMenu()
@@ -362,6 +391,7 @@ bool buildMenu()
         addUsers();
         break;
     case 4:
+        clearScreen();
         deleteUser();
         break;
     case 5:
