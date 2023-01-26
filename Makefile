@@ -2,7 +2,7 @@ MAIN = usda-apps
 COMPILER = g++
 TEMP_DIR = ./temp/
 
-all: build access clear run
+all: clear build access run
 
 clear:
 	clear
