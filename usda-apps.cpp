@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <csignal>
+#include <string>
 using namespace std;
 
 #define arrLength(x) (sizeof(x) / sizeof(x[0]))
@@ -46,11 +47,16 @@ vector<string> split(string str, string separator = " ")
 
 void signalHandler(int signum)
 {
-    cout << endl
-         << endl;
+    cout << endl;
+    cout << endl;
     cout << "  Interrupt signal (" << signum << ") by user." << endl;
     cout << endl;
     exit(signum);
+}
+
+int getDigit(int number)
+{
+    return to_string(number).length();
 }
 
 void writeFile(User *users, unsigned int count)
@@ -100,14 +106,42 @@ vector<User> readFile()
     return users;
 }
 
-void getAllUsers()
+void printApp()
 {
-    cout << "  call getAllUsers()" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << "+ ---------------------------- UsDa Apps ----------------------------- +" << endl;
+    cout << "+ ------------------------ User Database Apps ------------------------ +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
 }
 
-void getUserByName()
+void getAllUsers()
 {
-    cout << "  call getUserByName()" << endl;
+    printApp();
+    cout << "+ -------------------------- Get all users --------------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+    vector<User> users = readFile();
+
+    for (int i = 0; i < users.size(); i++)
+    {
+        User user = users[i];
+        int idx = i + 1;
+
+        cout << "+ -------------------------------------------------------------------- +" << endl;
+        cout << "+ [" << idx << "] ";
+        cout << "-> Name    : " << user.nama << endl;
+        cout << "+  " << string(getDigit(idx), ' ') << "  ";
+        cout << "-> Alamat  : " << user.alamat << endl;
+        cout << "+  " << string(getDigit(idx), ' ') << "  ";
+        cout << "-> Umur    : " << user.umur << endl;
+        cout << "+ -------------------------------------------------------------------- +" << endl;
+    }
+    cout << endl;
+}
+
+void searchUserByName()
+{
+    cout << "  call searchUserByName()" << endl;
 }
 
 void addUsers()
@@ -124,13 +158,10 @@ bool buildMenu()
 {
     int chooseMenu;
     int totalChoose = 5;
-    cout << "+ -------------------------------------------------------------------- +" << endl;
-    cout << "+ ---------------------------- UsDa Apps ----------------------------- +" << endl;
-    cout << "+ ------------------------ User Database Apps ------------------------ +" << endl;
-    cout << "+ -------------------------------------------------------------------- +" << endl;
+    printApp();
     cout << "\n  The menu: " << endl;
     cout << "  [1] Get all users" << endl;
-    cout << "  [2] Get user by name" << endl;
+    cout << "  [2] Search user by name" << endl;
     cout << "  [3] Add users" << endl;
     cout << "  [4] Delete user" << endl;
     cout << "  [5] Exit" << endl;
@@ -172,10 +203,11 @@ bool buildMenu()
     switch (chooseMenu)
     {
     case 1:
+        clearScreen();
         getAllUsers();
         break;
     case 2:
-        getUserByName();
+        searchUserByName();
         break;
     case 3:
         addUsers();
