@@ -10,13 +10,15 @@ using namespace std;
 
 const string FILENAME = "users.csv";
 const string SEPARATOR = ",";
-const int userData = 3;
+const int userData = 5;
 
 struct User
 {
-    string nama;
-    string alamat;
-    int umur;
+    string name;
+    string adress;
+    string hoby;
+    string phone;
+    int age;
 };
 
 void clearScreen()
@@ -45,15 +47,29 @@ bool isAlphaSpace(const string &s)
     return true;
 }
 
+bool isAlphaNumericSpace(const string &s)
+{
+    for (char c : s)
+    {
+        if (!(isalpha(c) || isalnum(c) || (c == ' ')))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 string toUpper(string str)
 {
-    for (int i = 0; i < str.length(); i++) {
+    for (int i = 0; i < str.length(); i++)
+    {
         str[i] = toupper(str[i]);
     }
     return str;
 }
 
-bool searchString(string str, string find) {
+bool searchString(string str, string find)
+{
     return toUpper(str).find(toUpper(find)) != std::string::npos;
 }
 
@@ -84,18 +100,17 @@ int getDigit(int number)
     return to_string(number).length();
 }
 
-void writeFile(User *users, unsigned int count)
+void writeFile(vector<User> users)
 {
     fstream writeFile;
     writeFile.open(FILENAME, ios::out);
     if (writeFile.is_open())
     {
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < users.size(); i++)
         {
             User user = users[i];
-            writeFile << user.nama << SEPARATOR << user.alamat << SEPARATOR << user.umur << "\n";
+            writeFile << user.name << SEPARATOR << user.adress << SEPARATOR << user.hoby << SEPARATOR << user.phone << SEPARATOR << user.age << "\n";
         }
-        cout << count << " users have been recorded" << endl;
         writeFile.close();
     }
 }
@@ -121,7 +136,9 @@ vector<User> readFile()
             User user = User{
                 row[0],
                 row[1],
-                stoi(row[2]),
+                row[2],
+                row[3],
+                stoi(row[4]),
             };
             users.push_back(user);
         }
@@ -129,6 +146,84 @@ vector<User> readFile()
 
     readFile.close();
     return users;
+}
+
+int inputInteger(string wording, int *maxRange = NULL, string rangeWording = "Data not found")
+{
+    int getInt;
+    while (true)
+    {
+        string strGetInt;
+        cout << wording;
+        cin >> strGetInt;
+        cout << endl;
+
+        if (!isNumber(strGetInt))
+        {
+            cout << "  Please input a number!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        int tempGetInt = stoi(strGetInt);
+        if (tempGetInt < 0)
+        {
+            cout << "  Please input a positive number!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        if (maxRange != NULL)
+        {
+            if (!(tempGetInt >= 0 && tempGetInt <= *maxRange))
+            {
+                cout << "  " << rangeWording << ", available in range 1-" << *maxRange << endl;
+                cout << endl;
+                continue;
+            }
+        }
+
+        getInt = tempGetInt;
+        break;
+    }
+    return getInt;
+}
+
+string inputString(string wording, string flag = "")
+{
+    string getString;
+    while (true)
+    {
+        string tempGetString;
+        cout << wording;
+        getline(cin, tempGetString);
+        cout << endl;
+
+        if (!isAlphaSpace(tempGetString) && flag == "")
+        {
+            cout << "  Please input an alpha space!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        if (!isNumber(tempGetString) && flag == "phone")
+        {
+            cout << "  Please input a number!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        if (!isAlphaNumericSpace(tempGetString) && flag == "adress")
+        {
+            cout << "  Please input an alpha, numeric, and space!" << endl;
+            cout << endl;
+            continue;
+        }
+
+        getString = tempGetString;
+        break;
+    }
+    return getString;
 }
 
 void printApp()
@@ -146,13 +241,14 @@ void printUsers(vector<User> users)
         User user = users[i];
         int idx = i + 1;
 
+        string firsts = "+ [" + to_string(idx) + "] ";
+        string spacer = "+  " + string(getDigit(idx), ' ') + "  ";
         cout << "+ -------------------------------------------------------------------- +" << endl;
-        cout << "+ [" << idx << "] ";
-        cout << "-> Name    : " << user.nama << endl;
-        cout << "+  " << string(getDigit(idx), ' ') << "  ";
-        cout << "-> Alamat  : " << user.alamat << endl;
-        cout << "+  " << string(getDigit(idx), ' ') << "  ";
-        cout << "-> Umur    : " << user.umur << endl;
+        cout << firsts << "-> Name    : " << user.name << endl;
+        cout << spacer << "-> Adress  : " << user.adress << endl;
+        cout << spacer << "-> Hoby    : " << user.hoby << endl;
+        cout << spacer << "-> Phone   : " << user.phone << endl;
+        cout << spacer << "-> Age     : " << user.age << endl;
         cout << "+ -------------------------------------------------------------------- +" << endl;
     }
     cout << endl;
@@ -171,38 +267,20 @@ void getAllUsers()
 
 void searchUserByName()
 {
-    string search;
     printApp();
     cout << "+ ----------------------- Search users by name ----------------------- +" << endl;
     cout << "+ -------------------------------------------------------------------- +" << endl;
     cout << endl;
 
     cin.ignore();
-    while (true)
-    {
-        string tempSearch;
-        cout << "  Search name: ";
-        getline(cin, tempSearch);
-        cout << endl;
-
-        if (!isAlphaSpace(tempSearch))
-        {
-            cout << "  Please input an alpha space!" << endl;
-            cout << endl;
-            continue;
-        }
-
-        search = tempSearch;
-        break;
-    }
-
+    string search = inputString("  Search name: ");
     vector<User> users = readFile();
 
     vector<User> filterUsers;
     for (int i = 0; i < users.size(); i++)
     {
         User user = users[i];
-        bool found = searchString(user.nama, search);
+        bool found = searchString(user.name, search);
         if (found)
         {
             filterUsers.push_back(user);
@@ -221,7 +299,34 @@ void searchUserByName()
 
 void addUsers()
 {
-    cout << "  call addUsers()" << endl;
+    printApp();
+    cout << "+ ----------------------------- Add user ----------------------------- +" << endl;
+    cout << "+ -------------------------------------------------------------------- +" << endl;
+    cout << endl;
+
+    int countUser = inputInteger("  Many user: ");
+    vector<User> users = readFile();
+    int maxAge = 150;
+
+    cin.ignore();
+    for (int i = 0; i < countUser; i++)
+    {
+        string name = inputString("  Name    : ");
+        string adress = inputString("  Adress  : ", "adress");
+        string hoby = inputString("  Hoby    : ");
+        string phone = inputString("  Phone   : ", "phone");
+        int age = inputInteger("  Age     : ", &maxAge, "Age not valid");
+
+        User user = User{
+            name,
+            adress,
+            hoby,
+            phone,
+            age,
+        };
+        users.push_back(user);
+    }
+    writeFile(users);
 }
 
 void deleteUser()
@@ -231,7 +336,6 @@ void deleteUser()
 
 bool buildMenu()
 {
-    int chooseMenu;
     int totalChoose = 5;
     printApp();
     cout << "\n  The menu: " << endl;
@@ -242,39 +346,7 @@ bool buildMenu()
     cout << "  [5] Exit" << endl;
     cout << endl;
 
-    while (true)
-    {
-        string strChooseMenu;
-        cout << "  Choose the menu: ";
-        cin >> strChooseMenu;
-        cout << endl;
-
-        if (!isNumber(strChooseMenu))
-        {
-            cout << "  Please input a number!" << endl;
-            cout << endl;
-            continue;
-        }
-
-        int tempChooseMenu = stoi(strChooseMenu);
-        if (tempChooseMenu < 0)
-        {
-            cout << "  Please input a positive number!" << endl;
-            cout << endl;
-            break;
-        }
-
-        if (!(tempChooseMenu >= 0 && tempChooseMenu <= totalChoose))
-        {
-            cout << "  List menu not found, available in range 1-" << totalChoose << endl;
-            cout << endl;
-            continue;
-        }
-
-        chooseMenu = tempChooseMenu;
-        break;
-    }
-
+    int chooseMenu = inputInteger("  Choose the menu: ", &totalChoose, "List menu not found");
     switch (chooseMenu)
     {
     case 1:
@@ -286,6 +358,7 @@ bool buildMenu()
         searchUserByName();
         break;
     case 3:
+        clearScreen();
         addUsers();
         break;
     case 4:

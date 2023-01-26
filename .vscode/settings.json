@@ -3,6 +3,8 @@
         "iostream": "cpp",
         "ostream": "cpp",
         "string": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "algorithm": "cpp",
+        "iosfwd": "cpp"
     }
 }
